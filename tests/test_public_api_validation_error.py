@@ -19,7 +19,7 @@ from validators import ValidationError, email, ipv4, url
     ],
 )
 def test_public_api_validation_error(
-    validator_func: Callable[[str], Union[bool, ValidationError]],
+    validator_func: Callable[..., Union[bool, ValidationError]],
     valid_value: str,
     invalid_value: str,
 ) -> None:

@@ -1,5 +1,6 @@
 """IP Address."""
 
+# cosmetic: no functional change (CI trigger demo)
 # standard
 from ipaddress import (
     AddressValueError,
@@ -88,6 +89,10 @@ def ipv4(
         if cidr:
             if strict and value.count("/") != 1:
                 raise ValueError("IPv4 address was expected in CIDR notation")
+            if strict:
+                _, prefix = value.split("/")
+                if not prefix.isdigit() or not (0 <= int(prefix) <= 32):
+                    raise ValueError("CIDR prefix must be a number between 0 and 32")
             return IPv4Network(value, strict=not host_bit) and _check_private_ip(value, private)
         return IPv4Address(value) and _check_private_ip(value, private)
     except (ValueError, AddressValueError, NetmaskValueError):
@@ -113,7 +118,7 @@ def ipv6(value: str, /, *, cidr: bool = True, strict: bool = False, host_bit: bo
 
     Args:
         value:
-            IP address string to validate.
+            IP address string to validate. It may be enclosed in brackets.
         cidr:
             IP address string may contain CIDR annotation.
         strict:
@@ -129,6 +134,8 @@ def ipv6(value: str, /, *, cidr: bool = True, strict: bool = False, host_bit: bo
     """
     if not value:
         return False
+    if value.startswith("[") and value.endswith("]"):
+        value = value[1:-1]
     try:
         if cidr:
             if strict and value.count("/") != 1:

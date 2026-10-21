@@ -3,9 +3,9 @@ name: pycqa
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [master, release]
   pull_request:
-    branches: [master]
+    branches: [master, release]
 jobs:
   tooling:
     runs-on: ubuntu-latest
@@ -50,3 +50,10 @@ jobs:
         run: uv sync --locked --no-editable --group testing --extra crypto-eth-addresses
       - name: Testing
         run: uv run --no-sync pytest .
+      # coverage is measured separately, scoped to `tests/`: collecting doctest
+      # modules alongside the installed package corrupts coverage tracking for
+      # some modules (duplicate module identities for the same file)
+      - name: Coverage
+        run: |
+          uv run --no-sync pytest tests/ \
+            --cov=validators --cov-report=term-missing --cov-report=xml

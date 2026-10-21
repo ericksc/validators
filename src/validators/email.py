@@ -55,7 +55,7 @@ def email(
         (Literal[True]): If `value` is a valid eMail.
         (ValidationError): If `value` is an invalid eMail.
     """
-    if not value or value.count("@") != 1:
+    if not value or "@" not in value:
         return False
 
     username_part, domain_part = value.rsplit("@", 1)
@@ -68,6 +68,8 @@ def email(
         if domain_part.startswith("[") and domain_part.endswith("]"):
             # ref: RFC 5321
             domain_part = domain_part.lstrip("[").rstrip("]")
+            if ipv6_address and domain_part.startswith("IPv6:"):
+                domain_part = domain_part[5:]
         else:
             return False
 
@@ -91,8 +93,8 @@ def email(
             + r"(\.[\u0100-\u017F\u0180-\u024F\u00A0-\u00FF0-9a-z!#$%&'*+/=?^_`{}|~\-]+)*$"
             # quoted-string
             + r'|^"('
-            + r"[\u0100-\u017F\u0180-\u024F\u00A0-\u00FF\001-\010\013\014\016-\037"
-            + r"!#-\[\]-\177]|\\[\011.]"
+            + r"[\u0100-\u017F\u0180-\u024F\u00A0-\u00FF"
+            + r"!#-\[\]-~]|\\[\011.]"
             + r')*")$',
             username_part,
             re.IGNORECASE,
